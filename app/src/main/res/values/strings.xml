@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">What\'s What</string>
+    <string name="action_logout">Logout</string>
+    <string name="title_activity_login">Login</string>
+    <string name="title_activity_signup">Signup</string>
+    <string name="dialog_title_instructions">How to play</string>
+    <string name="dialog_title_answer_question">What\'s the answer?</string>
+</resources>

@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "468408034745",
+    "firebase_url": "https://kotlinisfun.firebaseio.com",
+    "project_id": "kotlinisfun",
+    "storage_bucket": "kotlinisfun.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:468408034745:android:edc06554037af1f8",
+        "android_client_info": {
+          "package_name": "com.app.kotlin.kotlinisfun"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "468408034745-ue4v4uf344ijogu7j26hfs9bbivi18tr.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "468408034745-ue4v4uf344ijogu7j26hfs9bbivi18tr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJM9HMhy7n5k2PmDB_ncxQ6nxVQLSIuAA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

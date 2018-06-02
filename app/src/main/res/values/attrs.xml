@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="progress_bar_attr">
+        <attr name="fitSystemWindows">true</attr>
+        <attr name="indeterminate">true</attr>
+        <attr name="visibility">invisible</attr>
+        <attr name="layout_behavior">android.support.design.widget.AppBarLayout$ScrollingViewBehavior</attr>
+    </declare-styleable>
+
+</resources>
