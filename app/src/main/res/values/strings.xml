@@ -5,4 +5,5 @@
     <string name="title_activity_signup">Signup</string>
     <string name="dialog_title_instructions">How to play</string>
     <string name="dialog_title_answer_question">What\'s the answer?</string>
+    <string name="title_activity_create_question">Create a Question</string>
 </resources>

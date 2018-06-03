@@ -5,7 +5,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.list_item_audio_clip.view.*
+import kotlinx.android.synthetic.main.list_item_question.view.*
 
 /**
  * Created by deep on 5/30/18.
@@ -18,7 +18,7 @@ class QuestionsAdapter(val context: Context, private val callbacks: Callbacks) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val li = LayoutInflater.from(context)
-        val view = li.inflate(R.layout.list_item_audio_clip, parent, false)
+        val view = li.inflate(R.layout.list_item_question, parent, false)
         return ViewHolder(view)
     }
 
@@ -65,7 +65,7 @@ class QuestionsAdapter(val context: Context, private val callbacks: Callbacks) :
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         // Holds the TextView that will add each animal to
         val constraintLayout = view.constraint_layout!!
-        val question = view.question!!
+        val question = view.question_et!!
         val creator = view.creator!!
         val points = view.point_count!!
     }

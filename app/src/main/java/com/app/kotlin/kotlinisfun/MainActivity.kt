@@ -1,10 +1,8 @@
 package com.app.kotlin.kotlinisfun
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
@@ -19,19 +17,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
 
-class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener,
-        OnCompleteListener<QuerySnapshot>, QuestionsAdapter.Callbacks {
+class MainActivity : BaseActivity(), OnCompleteListener<QuerySnapshot>, QuestionsAdapter.Callbacks {
 
-    val db = FirebaseFirestore.getInstance()
-
-    override fun onStart() {
-        super.onStart()
-        if(FirebaseAuth.getInstance().currentUser == null){
-            val i = Intent(this, LoginActivity::class.java)
-            startActivity(i)
-            finish()
-        }
-    }
+    val user = FirebaseAuth.getInstance().currentUser
+    val firestore = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,9 +32,6 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener,
             InstructionsDialog.newInstance().show(supportFragmentManager, InstructionsDialog.TAG)
         }
 
-        swipe_refresh_layout.setOnRefreshListener(this)
-        swipe_refresh_layout.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorPrimary))
-
         adapter = QuestionsAdapter(this, this)
 
         val itemDecor = DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL)
@@ -53,18 +39,38 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener,
         recycler.adapter = adapter
         recycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
-        getData()
 
         fab.setOnClickListener({
-
+            var i = Intent(this, CreateQuestionActivity::class.java)
+            startActivityForResult(i, CREATE_REQ)
         })
+
+        onRefresh()
     }
+
+    private var points: Long = 0
+
+    override fun onStart() {
+        super.onStart()
+        if (user == null) {
+            val i = Intent(this, LoginActivity::class.java)
+            startActivity(i)
+            finish()
+            return
+        }
+
+        var infoRef = firestore.collection("UserInfo").document(user.uid)
+        infoRef.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+            points = documentSnapshot!!["points"].toString().toLong()
+
+            toolbar!!.title = " Points:" + points
+        }
+    }
+
 
     private val questionCallback = object : AnswerQuestionDialog.EventListener {
         override fun onOkay(answer: String, question: Question) {
-            Log.v(TAG, answer)
-            Log.v(TAG, question.answer)
-
+            showKeyboard(false)
             val correct = answer.toLowerCase().equals(question.answer.toLowerCase())
             if (correct) {
                 onAnswerCorrect(question)
@@ -75,16 +81,83 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener,
     }
 
     private fun onAnswerCorrect(question: Question) {
+        showProgress(true)
+        firestore.runTransaction {
+            var infoRef = firestore.collection("UserInfo").document(user!!.uid)
+            var questionRef = firestore.collection("Questions").document(question.id)
 
+            // get the user's information specifically their points
+            var userPoints = it.get(infoRef)["points"].toString().toLong()
+
+            // give the user the points that the question was worth
+            var questionPoints = it.get(questionRef)["points"].toString().toLong()
+            it.update(infoRef, "points", userPoints + questionPoints)
+
+            // mark the question answered
+            it.update(questionRef, "answered", true)
+
+            return@runTransaction
+        }.addOnCompleteListener {
+            showProgress(false)
+            if (it.isSuccessful) {
+                onRefresh()
+                showSnackbar("Correct!")
+            }
+        }.addOnFailureListener {
+            Log.v(TAG, it.toString())
+            showSnackbar("Error updating information")
+        }
     }
 
     private fun onAnswerIncorrect(question: Question) {
+        showProgress(true)
+        firestore.runTransaction {
+            var infoRef = firestore.collection("UserInfo").document(user!!.uid)
+            var addRef = firestore.collection("UserInfo").document(question.creatorId)
+            var questionRef = firestore.collection("Questions").document(question.id)
 
+            // subtract 2 points from the users total points
+            var points = it.get(infoRef)["points"].toString().toLong()
+            points -= 2
+
+            // add one point to the user that created the question
+            var creatorPoints = it.get(addRef)["points"].toString().toLong()
+            creatorPoints += 1
+
+            // add one point to the bounty of the question
+            var questionPoints = it.get(questionRef)["points"].toString().toLong()
+            questionPoints += 1
+
+            //update the information
+            it.update(infoRef, "points", points)
+            it.update(addRef, "points", creatorPoints)
+            it.update(questionRef, "points", questionPoints)
+
+            return@runTransaction
+        }.addOnCompleteListener {
+            showProgress(false)
+            if (it.isSuccessful) {
+                onRefresh()
+                showSnackbar("That was the wrong answer please try again")
+            }
+        }.addOnFailureListener {
+            Log.v(TAG, it.toString())
+            showSnackbar("Error updating information")
+        }
     }
 
     override fun onItemClicked(pos: Int, question: Question) {
-        AnswerQuestionDialog.newInstance(question, questionCallback)
-                .show(supportFragmentManager, AnswerQuestionDialog.TAG)
+        if (user!!.email.equals(question.creator)) {
+            showSnackbar("You can't answer your own question")
+            return
+        }
+
+        if (points < 2L) {
+            showSnackbar("you don't have enough points to answer questions =(")
+        } else {
+            AnswerQuestionDialog.newInstance(question, questionCallback)
+                    .show(this.supportFragmentManager, AnswerQuestionDialog.TAG)
+        }
     }
 
     override fun onComplete(task: Task<QuerySnapshot>) {
@@ -94,9 +167,11 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener,
             adapter!!.clear()
             for (document in task.result) {
                 val question = Question()
+                question.id = document.id
                 question.answer = (document.get("answer") as String?)!!
                 question.question = (document.get("question") as String?)!!
                 question.creator = (document.get("creator") as String?)!!
+                question.creatorId = (document.get("creatorId") as String?)!!
                 question.points = (document.get("points") as Long?)!!
                 adapter!!.addItem(question)
             }
@@ -107,17 +182,24 @@ class MainActivity : BaseActivity(), SwipeRefreshLayout.OnRefreshListener,
     }
 
     override fun onRefresh() {
-        getData()
+        val docRef = firestore.collection("Questions")
+        docRef.whereEqualTo("answered", false).get().addOnCompleteListener(this)
+        showProgress(true)
     }
 
     private var adapter: QuestionsAdapter? = null
 
-    private fun getData() {
-        swipe_refresh_layout.isRefreshing = true
+    private val CREATE_REQ: Int = 1
 
-        val db = FirebaseFirestore.getInstance()
-        val docRef = db.collection("Questions")
-        docRef.get().addOnCompleteListener(this)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            CREATE_REQ -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    onRefresh()
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

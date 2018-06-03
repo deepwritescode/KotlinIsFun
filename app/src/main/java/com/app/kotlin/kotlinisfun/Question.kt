@@ -23,6 +23,12 @@ class Question : Serializable {
     var answer: String = ""
         internal set
 
-    var createdAt: Date? = null
+    var answered: Boolean = false
+        internal set
+
+    var createdAt: Calendar? = null
+        internal set
+
+    var creatorId: String = ""
         internal set
 }

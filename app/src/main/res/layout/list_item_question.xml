@@ -2,14 +2,14 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/constraint_layout"
     android:foreground="?android:attr/selectableItemBackground"
     android:padding="14dp">
 
     <TextView
-        android:id="@+id/question"
+        android:id="@+id/question_et"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#000"
@@ -31,15 +31,15 @@
         tools:text="12" />
 
     <TextView
-        android:layout_marginTop="4dp"
         android:id="@+id/creator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:textSize="14sp"
         android:textStyle="italic"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/question"
+        app:layout_constraintTop_toBottomOf="@+id/question_et"
         tools:text="Deep Patel" />
 
 </android.support.constraint.ConstraintLayout>

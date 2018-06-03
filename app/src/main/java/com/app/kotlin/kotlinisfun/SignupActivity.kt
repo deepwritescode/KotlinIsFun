@@ -7,8 +7,6 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-
-import kotlinx.android.synthetic.main.activity_signup.*
 import kotlinx.android.synthetic.main.content_signup.*
 
 
@@ -48,7 +46,7 @@ class SignupActivity : BaseActivity() {
         val docData = HashMap<String, Any>()
         docData["points"] = 50
 
-        FirebaseFirestore.getInstance().collection("UserData")
+        FirebaseFirestore.getInstance().collection("UserInfo")
                 .document(FirebaseAuth.getInstance().currentUser!!.uid)
                 .set(docData)
                 .addOnSuccessListener(OnSuccessListener<Void> {

@@ -15,7 +15,8 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
 
-abstract class BaseActivity : AppCompatActivity() {
+abstract class BaseActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
+
     val TAG = this.javaClass.name!!
 
     var progressBar: ProgressBar? = null
@@ -34,11 +35,11 @@ abstract class BaseActivity : AppCompatActivity() {
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout)
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout!!.setColorSchemeColors(ContextCompat.getColor(this, R.color.colorPrimary), ContextCompat.getColor(this, R.color.colorAccent))
-            swipeRefreshLayout!!.setOnRefreshListener(SwipeRefreshLayout.OnRefreshListener { refreshData() })
+            swipeRefreshLayout!!.setOnRefreshListener(this)
         }
     }
 
-    protected fun refreshData() {
+    override fun onRefresh() {
 
     }
 
@@ -51,10 +52,9 @@ abstract class BaseActivity : AppCompatActivity() {
             this.window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
         } else {
             val inputManager: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            inputManager.hideSoftInputFromWindow(currentFocus.windowToken, InputMethodManager.SHOW_FORCED)
+            inputManager.hideSoftInputFromWindow(this.currentFocus.windowToken!!, InputMethodManager.SHOW_FORCED)
         }
     }
-
 
     protected fun showSnackbar(message: String) {
         if (AppBase.isDebug()) {
@@ -86,8 +86,6 @@ abstract class BaseActivity : AppCompatActivity() {
      * Shows the progress UI and hides the login form.
      */
     protected fun showProgress(show: Boolean) {
-        showKeyboard(!show)
-
         if (show) showProgressBar()
         else hideProgressBar()
 
