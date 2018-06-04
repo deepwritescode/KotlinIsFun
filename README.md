@@ -12,4 +12,4 @@ To run the project, download Android Studio and setup the environment, you can f
 
 You might need to install the sdk but that will be included in the tutorial for Android Studio
 
-the press the run button with your emulator installed, or device plugged in and the app should launch
+Once you have Android Studio installed, press the run button with your emulator installed, or device plugged in and the app should launch
